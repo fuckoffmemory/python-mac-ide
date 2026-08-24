@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>PyOS Editor</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Верхняя панель (Dock) -->
+    <div class="dock">
+        <button id="new-file-btn">+ Новый файл</button>
+        <button id="run-btn">▶ Выполнить</button>
+        <button id="theme-toggle-btn">🌙 Тема</button>
+        <button id="install-lib-btn">⬇ Импорт lib</button>
+    </div>
+
+    <!-- Область редактора -->
+    <div class="editor-container">
+        <!-- Шапка с вкладками -->
+        <div class="file-tabs" id="file-tabs">
+            <div class="tab active" data-filename="main.py">main.py</div>
+        </div>
+        
+        <!-- Само поле ввода -->
+        <textarea id="code-editor" spellcheck="false">print("Привет из веб-Python!")
+# Для установки библиотек используйте кнопку "Импорт lib"
+# Пример стандартной библиотеки:
+import math
+print(f"Косинус нуля: {math.cos(0)}")</textarea>
+    </div>
+
+    <!-- Терминал вывода -->
+    <div class="terminal">
+        <pre id="output-terminal"></pre>
+    </div>
+
+    <!-- Скрипты -->
+    <!-- Подключаем Pyodide (Python в браузере) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
