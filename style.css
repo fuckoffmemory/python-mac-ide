@@ -1,0 +1,134 @@
+:root {
+    --bg-color: #f7f7f7;
+    --text-color: #1d1d1d;
+    --panel-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --active-tab: #ffffff;
+}
+
+.dark-mode {
+    --bg-color: #1e1e1e;
+    --text-color: #f9f9f9;
+    --panel-bg: #2d2d2d;
+    --border-color: #3a3a3a;
+    --active-tab: #3a3a3a;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.dock {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 10;
+}
+
+.dock button {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+
+.dock button:hover {
+    background: var(--panel-bg);
+    transform: translateY(-2px);
+}
+
+.editor-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--panel-bg);
+}
+
+.file-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--panel-bg);
+    padding-left: 10px;
+    min-height: 36px;
+    align-items: center;
+    gap: 5px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 6px 12px;
+    border-radius: 6px 6px 0 0;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    background: #e8e8e8;
+    opacity: 0.7;
+}
+
+.tab.active {
+    background: var(--active-tab);
+    opacity: 1;
+    border-bottom: 2px solid dodgerblue;
+}
+
+#code-editor {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'SF Mono', Menlo, Monaco, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    background: inherit;
+    color: inherit;
+    /* Кастомная полоса прокрутки для MacOS */
+    scrollbar-width: thin; /* Firefox */
+}
+
+/* Chrome/Safari */
+#code-editor::-webkit-scrollbar {
+    width: 10px;
+}
+#code-editor::-webkit-scrollbar-track {
+    background: transparent;
+}
+#code-editor::-webkit-scrollbar-thumb {
+    background: #c0c0c0;
+    border-radius: 5px;
+}
+
+.dark-mode #code-editor::-webkit-scrollbar-thumb {
+    background: #6b6b6b;
+}
+
+.terminal {
+    height: 200px;
+    background: #000000;
+    color: #00ff00;
+    padding: 15px;
+    font-family: 'SF Mono', Menlo, Monaco, monospace;
+    font-size: 13px;
+    overflow-y: auto;
+    border-top: 1px solid var(--border-color);
+}
