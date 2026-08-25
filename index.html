@@ -2,41 +2,958 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>PyOS Editor</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Cloud · Pyodide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Roboto Mono', monospace; transition: background-color 0.2s, border-color 0.2s; }
+        body { min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; background: #1a1e24; padding: 20px; }
+        .tech-panel { max-width: 1200px; width: 100%; background: #232830; border: 2px solid #3f4a5a; border-radius: 28px; padding: 28px 30px 35px; box-shadow: 0 18px 30px rgba(0,0,0,0.7); margin-top: 10px; }
+        body.light .tech-panel { background: #dfe8f2; border-color: #9bb1cc; box-shadow: 0 18px 30px rgba(0,0,0,0.3); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+        .led-group { display: flex; gap: 12px; align-items: center; }
+        .led { width: 14px; height: 14px; border-radius: 50%; background: #3b4a5a; box-shadow: inset 0 0 4px rgba(0,0,0,0.6); }
+        .led.red { background: #e34f4f; box-shadow: 0 0 8px #e34f4f88; }
+        .led.green { background: #4fc97b; box-shadow: 0 0 8px #4fc97b88; }
+        .led.blue { background: #4f9fe3; box-shadow: 0 0 8px #4f9fe388; }
+        .sys-label { color: #a2b9d6; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; background: #2c3542; padding: 5px 14px; border-radius: 40px; border: 1px solid #3f4e62; font-weight: 500; }
+        body.light .sys-label { background: #c9d8ea; color: #1f2b39; border-color: #a6bdd9; }
+        .theme-toggle { display: flex; align-items: center; gap: 12px; background: #1f2937; padding: 6px 16px 6px 20px; border-radius: 60px; border: 1px solid #3f4f62; cursor: pointer; box-shadow: inset 0 2px 3px rgba(0,0,0,0.5); user-select: none; }
+        .theme-toggle:hover { border-color: #6d8bb0; background: #293544; }
+        .theme-toggle span { color: #b6cced; font-size: 0.8rem; font-weight: 500; }
+        body.light .theme-toggle { background: #cedcea; border-color: #96aecf; }
+        body.light .theme-toggle span { color: #1f2d40; }
+        .toggle-track { width: 44px; height: 24px; background: #1b232f; border-radius: 40px; border: 1px solid #41536a; display: flex; align-items: center; padding: 2px 4px; transition: 0.25s; }
+        .toggle-thumb { height: 18px; width: 18px; background: #7f9bc7; border-radius: 50%; box-shadow: 0 2px 4px black; transition: 0.25s; transform: translateX(0px); }
+        body.light .toggle-thumb { transform: translateX(20px); background: #f5c542; }
+        body.light .toggle-track { background: #b7cbdf; border-color: #7f99b9; }
+        body.light .toggle-thumb { background: #2b4a72; }
+
+        .main-layout { display: flex; gap: 20px; margin-top: 10px; min-height: 400px; }
+        .sidebar { width: 280px; min-width: 200px; background: #1a212b; border-radius: 18px; border: 1px solid #374659; padding: 16px; max-height: 500px; overflow-y: auto; display: flex; flex-direction: column; }
+        body.light .sidebar { background: #f2f7fe; border-color: #a7bbd6; }
+        .sidebar-title { color: #a2b9d6; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        body.light .sidebar-title { color: #1f2b39; }
+        #projectList { flex: 1; overflow-y: auto; }
+        .project-item { padding: 10px 12px; margin-bottom: 6px; background: #232830; border-radius: 12px; border: 1px solid #2f3d4f; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        body.light .project-item { background: #eaf1fb; border-color: #b8cbe0; }
+        .project-item:hover { border-color: #6d8bb0; background: #2a364a; }
+        body.light .project-item:hover { background: #dce6f2; }
+        .project-item.active { border-color: #4f9fe3; background: #2a3a52; }
+        body.light .project-item.active { background: #c9d8ea; border-color: #3b7bb0; }
+        .project-name { color: #d3e2fc; font-size: 0.9rem; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+        body.light .project-name { color: #1f2e44; }
+        .project-actions { display: flex; gap: 6px; flex-shrink: 0; margin-left: 8px; }
+        .icon-btn { background: transparent; border: none; color: #657b98; cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 0.8rem; }
+        .icon-btn:hover { color: #d3e2fc; background: #2f3d4f; }
+        body.light .icon-btn:hover { color: #1f2e44; background: #b8cbe0; }
+        .icon-btn.danger:hover { color: #e34f4f; }
+
+        .editor-area { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .file-tabs { display: flex; gap: 4px; flex-wrap: wrap; background: #1a212b; border-radius: 12px; padding: 6px; border: 1px solid #374659; min-height: 40px; }
+        body.light .file-tabs { background: #f2f7fe; border-color: #a7bbd6; }
+        .file-tab { padding: 6px 16px; background: #232830; border: 1px solid #2f3d4f; border-radius: 8px; color: #a2b9d6; cursor: pointer; font-size: 0.8rem; display: flex; align-items: center; gap: 8px; }
+        body.light .file-tab { background: #eaf1fb; border-color: #b8cbe0; color: #1f2b39; }
+        .file-tab.active { border-color: #4f9fe3; background: #2a3a52; color: #d3e2fc; }
+        body.light .file-tab.active { background: #c9d8ea; color: #1f2e44; }
+        .file-tab:hover { border-color: #6d8bb0; }
+        .file-tab .close-btn { background: none; border: none; color: #657b98; cursor: pointer; font-size: 0.8rem; padding: 0 4px; }
+        .file-tab .close-btn:hover { color: #e34f4f; }
+
+        .code-editor { 
+            background: #1a212b; 
+            border-radius: 18px; 
+            border: 1px solid #374659; 
+            padding: 6px; 
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.6); 
+            flex: 1; 
+            min-height: 300px;
+            position: relative;
+        }
+        body.light .code-editor { background: #f2f7fe; border-color: #a7bbd6; box-shadow: inset 0 4px 8px rgba(0,0,0,0.08); }
+
+        .editor-wrapper { 
+            display: flex; 
+            background: transparent; 
+            border-radius: 14px; 
+            overflow: hidden; 
+            height: 100%; 
+            position: relative;
+        }
+
+        .line-numbers { 
+            padding: 14px 10px 14px 14px; 
+            color: #4a5f7a; 
+            font-size: 0.8rem; 
+            font-family: 'Fira Code', monospace; 
+            text-align: right; 
+            user-select: none; 
+            background: rgba(0,0,0,0.15); 
+            border-right: 1px solid #2c3a4a; 
+            min-width: 40px; 
+            line-height: 1.6; 
+            overflow: hidden; 
+            white-space: pre; 
+            display: block; 
+        }
+        body.light .line-numbers { color: #6d86a5; background: rgba(0,0,0,0.05); border-right-color: #b8cbe0; }
+
+        /* ===== ПОДСВЕТКА СИНТАКСИСА (ПРЯМО В TEXTAREA) ===== */
+        #codeInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: vertical;
+            color: #d3e2fc;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            padding: 14px 16px;
+            min-height: 250px;
+            font-family: 'Fira Code', 'Roboto Mono', monospace;
+            tab-size: 4;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            caret-color: #d3e2fc;
+        }
+        body.light #codeInput { color: #1f2e44; caret-color: #1f2e44; }
+        #codeInput::placeholder { color: #657b98; opacity: 0.6; }
+        body.light #codeInput::placeholder { color: #6b7f99; }
+
+        /* Стили для подсветки через contenteditable */
+        .code-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            min-height: 250px;
+        }
+
+        .code-mirror {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 14px 16px;
+            padding-left: 0;
+            font-family: 'Fira Code', 'Roboto Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: hidden;
+            pointer-events: none;
+            color: transparent;
+            tab-size: 4;
+            z-index: 1;
+            margin-left: 0;
+        }
+
+        .code-mirror .kw { color: #ff7b72; }
+        .code-mirror .str { color: #a5d6ff; }
+        .code-mirror .cmt { color: #8b949e; font-style: italic; }
+        .code-mirror .num { color: #79c0ff; }
+        .code-mirror .fn { color: #d2a8ff; }
+        .code-mirror .builtin { color: #ffa657; }
+        .code-mirror .op { color: #ff7b72; }
+        .code-mirror .cls { color: #ff7b72; }
+        .code-mirror .dec { color: #d2a8ff; }
+
+        body.light .code-mirror .kw { color: #cf222e; }
+        body.light .code-mirror .str { color: #0a3069; }
+        body.light .code-mirror .cmt { color: #6e7781; }
+        body.light .code-mirror .num { color: #0550ae; }
+        body.light .code-mirror .fn { color: #8250df; }
+        body.light .code-mirror .builtin { color: #953800; }
+        body.light .code-mirror .op { color: #cf222e; }
+        body.light .code-mirror .cls { color: #cf222e; }
+        body.light .code-mirror .dec { color: #8250df; }
+
+        .action-bar { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; }
+        .btn { background: #2d3848; border: none; border-radius: 60px; padding: 10px 28px; font-weight: 600; font-size: 0.9rem; color: #c7defa; border: 1px solid #43566e; box-shadow: 0 4px 0 #0d121b, 0 4px 8px rgba(0,0,0,0.5); cursor: pointer; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0px 0 #0d121b, 0 4px 8px rgba(0,0,0,0.5); }
+        .btn-primary { background: #3a5d85; border-color: #5c82b0; color: white; box-shadow: 0 4px 0 #1f3144, 0 4px 8px rgba(0,0,0,0.5); }
+        .btn-primary:hover { background: #4973a3; border-color: #79a1cf; }
+        .btn:disabled { opacity: 0.6; transform: translateY(2px); box-shadow: 0 2px 0 #0d121b; cursor: not-allowed; }
+        body.light .btn { background: #ccdcee; border-color: #98aecb; color: #152433; box-shadow: 0 4px 0 #8f9fb3, 0 4px 8px rgba(0,0,0,0.15); }
+        body.light .btn-primary { background: #3b7bb0; border-color: #6199d0; color: white; box-shadow: 0 4px 0 #1e3b5a, 0 4px 8px rgba(0,0,0,0.2); }
+        body.light .btn-primary:hover { background: #4f8fc9; }
+
+        .output-area { flex: 1; min-width: 200px; background: #141b24; border-radius: 24px; padding: 12px 20px; border: 1px solid #33455a; color: #b6d0f0; font-family: 'Fira Code', monospace; font-size: 0.9rem; min-height: 60px; max-height: 160px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; box-shadow: inset 0 4px 8px rgba(0,0,0,0.6); }
+        body.light .output-area { background: #eaf1fb; border-color: #98afcc; color: #1a2b41; box-shadow: inset 0 4px 8px rgba(0,0,0,0.05); }
+        .output-area:empty::before { content: "› вывод будет здесь"; color: #546e8a; opacity: 0.6; }
+        body.light .output-area:empty::before { color: #5b7596; }
+
+        .footer-meta { margin-top: 18px; display: flex; justify-content: flex-end; color: #596f88; font-size: 0.7rem; letter-spacing: 0.5px; border-top: 1px solid #2f3d4f; padding-top: 14px; gap: 20px; flex-wrap: wrap; }
+        body.light .footer-meta { color: #455b75; border-top-color: #b3c4db; }
+        .footer-meta .status.ready { color: #4fc97b; }
+        .footer-meta .status.loading { color: #f5c542; }
+        .footer-meta .status.error { color: #e34f4f; }
+
+        .notification-toast { position: fixed; bottom: 30px; right: 30px; background: #2a3a52; color: #d3e2fc; padding: 12px 24px; border-radius: 40px; border: 1px solid #4f9fe3; box-shadow: 0 8px 24px rgba(0,0,0,0.5); z-index: 9999; font-size: 0.9rem; animation: fadeIn 0.3s ease; max-width: 300px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 9998; flex-direction: column; gap: 20px; color: #d3e2fc; font-size: 1.2rem; }
+        .loading-overlay .spinner { width: 50px; height: 50px; border: 5px solid #3a5d85; border-top-color: #4fc97b; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay.active { display: flex; }
+
+        @media (max-width: 850px) { .main-layout { flex-direction: column; } .sidebar { width: 100%; max-height: 200px; } .tech-panel { padding: 20px; } .action-bar { flex-direction: column; align-items: stretch; } .btn { justify-content: center; } }
+    </style>
 </head>
 <body>
-    <!-- Верхняя панель (Dock) -->
-    <div class="dock">
-        <button id="new-file-btn">+ Новый файл</button>
-        <button id="run-btn">▶ Выполнить</button>
-        <button id="theme-toggle-btn">🌙 Тема</button>
-        <button id="install-lib-btn">⬇ Импорт lib</button>
-    </div>
 
-    <!-- Область редактора -->
-    <div class="editor-container">
-        <!-- Шапка с вкладками -->
-        <div class="file-tabs" id="file-tabs">
-            <div class="tab active" data-filename="main.py">main.py</div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <span>⏳ Загрузка Python...</span>
+</div>
+
+<div class="tech-panel">
+    <div class="header">
+        <div class="led-group">
+            <span class="led red"></span>
+            <span class="led green"></span>
+            <span class="led blue"></span>
+            <span class="sys-label">⚙ Python Cloud</span>
         </div>
-        
-        <!-- Само поле ввода -->
-        <textarea id="code-editor" spellcheck="false">print("Привет из веб-Python!")
-# Для установки библиотек используйте кнопку "Импорт lib"
-# Пример стандартной библиотеки:
-import math
-print(f"Косинус нуля: {math.cos(0)}")</textarea>
+        <div class="theme-toggle" id="themeToggle" role="button" tabindex="0">
+            <span>☀️</span>
+            <div class="toggle-track"><div class="toggle-thumb"></div></div>
+        </div>
     </div>
 
-    <!-- Терминал вывода -->
-    <div class="terminal">
-        <pre id="output-terminal"></pre>
+    <div class="main-layout">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">
+                <span>📁 Проекты</span>
+                <span id="projectCount">0</span>
+            </div>
+            <div id="projectList"></div>
+        </div>
+
+        <div class="editor-area">
+            <div class="file-tabs" id="fileTabs"></div>
+            <div class="code-editor">
+                <div class="editor-wrapper">
+                    <div class="line-numbers" id="lineNumbers">1</div>
+                    <div class="code-container">
+                        <div class="code-mirror" id="codeMirror"></div>
+                        <textarea id="codeInput" spellcheck="false"># Настоящий Python через Pyodide!
+print("Hello, World!")
+
+x = 5
+if x > 3:
+    print("x больше 3")
+else:
+    print("x меньше или равно 3")
+
+# Попробуй input()
+name = input("Как тебя зовут? ")
+print("Привет, " + name)</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" id="runBtn">▶ Запустить</button>
+                <button class="btn" id="saveBtn">💾 Сохранить</button>
+                <button class="btn" id="newFileBtn">📄 Новый файл</button>
+                <div class="output-area" id="outputArea"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Скрипты -->
-    <!-- Подключаем Pyodide (Python в браузере) -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
-    <script src="script.js"></script>
+    <div class="footer-meta">
+        <span>⚡ Pyodide (настоящий Python 3.11)</span>
+        <span class="status ready" id="pyStatus">⏳ загрузка...</span>
+        <span>📦 Все функции Python работают</span>
+        <span>📁 новый файл без вопросов</span>
+        <span>📚 input() через prompt</span>
+    </div>
+</div>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+<script>
+    (function() {
+        // ==================== ПЕРЕМЕННЫЕ ====================
+        let pyodide = null;
+        let isReady = false;
+
+        // ==================== DOM ====================
+        const projectList = document.getElementById('projectList');
+        const projectCount = document.getElementById('projectCount');
+        const fileTabs = document.getElementById('fileTabs');
+        const codeInput = document.getElementById('codeInput');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const codeMirror = document.getElementById('codeMirror');
+        const output = document.getElementById('outputArea');
+        const runBtn = document.getElementById('runBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const newFileBtn = document.getElementById('newFileBtn');
+        const pyStatus = document.getElementById('pyStatus');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // ==================== ПОДСВЕТКА СИНТАКСИСА ====================
+        function highlightPython(code) {
+            // Экранируем HTML
+            let escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Комментарии
+            escaped = escaped.replace(/(#.*)/g, '<span class="cmt">$1</span>');
+            
+            // Строки
+            escaped = escaped.replace(/(["'])(?:(?!\1).)*?\1/g, '<span class="str">$&</span>');
+            
+            // Числа
+            escaped = escaped.replace(/\b(\d+\.?\d*)\b/g, '<span class="num">$1</span>');
+            
+            // Ключевые слова
+            const keywords = ['if', 'elif', 'else', 'for', 'while', 'def', 'class', 'return', 'import', 'from', 'as',
+                'with', 'try', 'except', 'finally', 'raise', 'assert', 'del', 'global', 'nonlocal', 'lambda', 'pass',
+                'break', 'continue', 'yield', 'async', 'await', 'True', 'False', 'None'
+            ];
+            escaped = escaped.replace(new RegExp(`\\b(${keywords.join('|')})\\b`, 'g'), '<span class="kw">$1</span>');
+            
+            // Встроенные функции
+            const builtins = ['print', 'input', 'len', 'range', 'type', 'str', 'int', 'float', 'list', 'dict', 'set',
+                'tuple', 'bool', 'sum', 'max', 'min', 'abs', 'sorted', 'open'
+            ];
+            escaped = escaped.replace(new RegExp(`\\b(${builtins.join('|')})\\b(?=\\s*\\()`, 'g'), '<span class="builtin">$1</span>');
+            
+            // Определения функций
+            escaped = escaped.replace(/\bdef\s+(\w+)/g, 'def <span class="fn">$1</span>');
+            
+            // Классы
+            escaped = escaped.replace(/\bclass\s+(\w+)/g, 'class <span class="cls">$1</span>');
+            
+            // Операторы
+            escaped = escaped.replace(/\b(and|or|not|in|is)\b/g, '<span class="op">$1</span>');
+            
+            return escaped;
+        }
+
+        function updateHighlight() {
+            const code = codeInput.value || '';
+            codeMirror.innerHTML = highlightPython(code);
+            // Синхронизируем прокрутку
+            codeMirror.scrollTop = codeInput.scrollTop;
+            codeMirror.scrollLeft = codeInput.scrollLeft;
+        }
+
+        // ==================== НОМЕРА СТРОК ====================
+        function updateLineNumbers() {
+            const lines = codeInput.value.split('\n').length;
+            let nums = '';
+            for (let i = 1; i <= lines; i++) nums += i + '\n';
+            lineNumbers.textContent = nums || '1';
+        }
+
+        // ==================== СОСТОЯНИЕ ====================
+        const state = {
+            projects: [],
+            currentProject: null,
+            currentFile: null,
+            activeFileIndex: 0,
+            fileCounter: 1
+        };
+
+        // ==================== УВЕДОМЛЕНИЯ ====================
+        function notify(msg) {
+            const old = document.querySelector('.notification-toast');
+            if (old) old.remove();
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ==================== ХРАНИЛИЩЕ ====================
+        function loadData() {
+            try {
+                const raw = localStorage.getItem('python-data');
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return { projects: [] };
+        }
+
+        function saveData() {
+            const data = { projects: state.projects, fileCounter: state.fileCounter };
+            localStorage.setItem('python-data', JSON.stringify(data));
+        }
+
+        // ==================== РЕНДЕР ====================
+        function renderProjects() {
+            projectList.innerHTML = '';
+            state.projects.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'project-item' + (state.currentProject?.id === p.id ? ' active' : '');
+                div.innerHTML = `
+                    <span class="project-name" data-id="${p.id}">${p.name}</span>
+                    <div class="project-actions">
+                        <button class="icon-btn danger" data-action="delete" data-id="${p.id}">✕</button>
+                    </div>
+                `;
+                projectList.appendChild(div);
+            });
+            projectCount.textContent = state.projects.length;
+        }
+
+        function openProject(id) {
+            const project = state.projects.find(p => p.id === id);
+            if (!project) return;
+            state.currentProject = project;
+            state.currentFile = project.files[0] || null;
+            state.activeFileIndex = 0;
+            renderProjects();
+            renderTabs();
+            loadFile();
+        }
+
+        function renderTabs() {
+            if (!state.currentProject) {
+                fileTabs.innerHTML = '';
+                return;
+            }
+            fileTabs.innerHTML = '';
+            state.currentProject.files.forEach((f, i) => {
+                const tab = document.createElement('div');
+                tab.className = 'file-tab' + (i === state.activeFileIndex ? ' active' : '');
+                tab.innerHTML = `
+                    ${f.name}
+                    <button class="close-btn" data-index="${i}">✕</button>
+                `;
+                tab.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('close-btn')) return;
+                    if (state.currentFile) {
+                        state.currentFile.content = codeInput.value;
+                        saveData();
+                    }
+                    state.activeFileIndex = i;
+                    state.currentFile = state.currentProject.files[i];
+                    renderTabs();
+                    loadFile();
+                });
+                const close = tab.querySelector('.close-btn');
+                close.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteFile(i);
+                });
+                fileTabs.appendChild(tab);
+            });
+        }
+
+        function loadFile() {
+            if (state.currentFile) {
+                codeInput.value = state.currentFile.content;
+                updateLineNumbers();
+                updateHighlight();
+            } else {
+                codeInput.value = '';
+            }
+        }
+
+        // ==================== ФАЙЛЫ ====================
+        function saveCurrentFile() {
+            if (!state.currentProject || !state.currentFile) {
+                ensureProjectExists();
+                if (!state.currentFile) return;
+            }
+            state.currentFile.content = codeInput.value;
+            saveData();
+            notify('✅ Файл сохранён');
+        }
+
+        function ensureProjectExists() {
+            if (state.projects.length === 0) {
+                const newProject = {
+                    id: 'p' + Date.now() + Math.random().toString(36).substr(2, 4),
+                    name: 'Мой проект',
+                    files: [{ name: 'main.py', content: codeInput.value }]
+                };
+                state.projects.push(newProject);
+                saveData();
+                openProject(newProject.id);
+                notify('📁 Создан новый проект');
+                return true;
+            }
+            if (!state.currentProject) {
+                openProject(state.projects[0].id);
+                return true;
+            }
+            return false;
+        }
+
+        function addNewFile() {
+            if (state.projects.length === 0) ensureProjectExists();
+            if (!state.currentProject) openProject(state.projects[0].id);
+            if (state.currentFile) {
+                state.currentFile.content = codeInput.value;
+                saveData();
+            }
+            const name = `file_${state.fileCounter}.py`;
+            state.fileCounter++;
+            const newFile = { name: name, content: '# Новый файл\n' };
+            state.currentProject.files.push(newFile);
+            state.activeFileIndex = state.currentProject.files.length - 1;
+            state.currentFile = newFile;
+            renderTabs();
+            loadFile();
+            saveData();
+            notify(`✅ Создан "${name}"`);
+        }
+
+        function deleteFile(index) {
+            if (!state.currentProject) return;
+            if (state.currentProject.files.length <= 1) {
+                notify('❌ Нельзя удалить единственный файл');
+                return;
+            }
+            if (!confirm(`Удалить "${state.currentProject.files[index].name}"?`)) return;
+            if (state.currentFile) {
+                state.currentFile.content = codeInput.value;
+                saveData();
+            }
+            state.currentProject.files.splice(index, 1);
+            if (state.activeFileIndex >= state.currentProject.files.length) {
+                state.activeFileIndex = state.currentProject.files.length - 1;
+            }
+            state.currentFile = state.currentProject.files[state.activeFileIndex];
+            renderTabs();
+            loadFile();
+            saveData();
+            notify('🗑️ Файл удалён');
+        }
+
+        function deleteProject(id) {
+            const project = state.projects.find(p => p.id === id);
+            if (!project) return;
+            if (!confirm(`Удалить проект "${project.name}" со всеми файлами?`)) return;
+            state.projects = state.projects.filter(p => p.id !== id);
+            if (state.currentProject?.id === id) {
+                state.currentProject = state.projects[0] || null;
+                state.currentFile = state.currentProject?.files[0] || null;
+                state.activeFileIndex = 0;
+                if (state.currentProject) { renderTabs(); loadFile(); }
+                else { fileTabs.innerHTML = ''; codeInput.value = ''; }
+            }
+            renderProjects();
+            saveData();
+            notify('🗑️ Проект удалён');
+        }
+
+        function renameProject(id) {
+            const project = state.projects.find(p => p.id === id);
+            if (!project) return;
+            const newName = prompt('Новое имя проекта:', project.name);
+            if (newName === null) return;
+            if (!newName || newName.trim() === '') {
+                notify('❌ Имя не может быть пустым');
+                return;
+            }
+            project.name = newName.trim();
+            renderProjects();
+            saveData();
+            notify('✏️ Имя обновлено');
+        }
+
+        // ==================== ЗАГРУЗКА PYODIDE ====================
+        async function loadPyodide() {
+            loadingOverlay.classList.add('active');
+            pyStatus.textContent = '⏳ загрузка Pyodide...';
+            pyStatus.className = 'status loading';
+
+            try {
+                pyodide = await loadPyodide({
+                    indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+                });
+                
+                // Настраиваем вывод
+                pyodide.runPython(`
+                    import sys
+                    from io import StringIO
+                    sys.stdout = StringIO()
+                `);
+
+                isReady = true;
+                pyStatus.textContent = '✅ готов';
+                pyStatus.className = 'status ready';
+                loadingOverlay.classList.remove('active');
+                notify('✅ Python загружен!');
+                console.log('✅ Pyodide загружен!');
+            } catch (e) {
+                console.error('Ошибка загрузки Pyodide:', e);
+                pyStatus.textContent = '❌ ошибка загрузки';
+                pyStatus.className = 'status error';
+                loadingOverlay.classList.remove('active');
+                notify('❌ Ошибка загрузки Python: ' + e.message);
+            }
+        }
+
+        // ==================== ЗАПУСК КОДА ====================
+        async function runCode() {
+            if (!isReady || !pyodide) {
+                output.textContent = '⏳ Python ещё загружается... Подождите';
+                return;
+            }
+
+            const code = codeInput.value;
+            if (!code.trim()) {
+                output.textContent = '⚠️ Введите код';
+                return;
+            }
+
+            output.textContent = '';
+            pyStatus.textContent = '⏳ выполнение...';
+            pyStatus.className = 'status loading';
+
+            try {
+                // Сбрасываем stdout
+                pyodide.runPython(`
+                    sys.stdout = StringIO()
+                `);
+
+                // Запускаем код с обработкой input()
+                const result = await pyodide.runPythonAsync(`
+                    import sys
+                    from io import StringIO
+                    
+                    # Перехватываем input()
+                    original_input = input
+                    def custom_input(prompt=""):
+                        return original_input(prompt)
+                    
+                    # Подменяем input() на наш
+                    __builtins__.input = custom_input
+                    
+                    try:
+                        exec(${JSON.stringify(code)})
+                        output = sys.stdout.getvalue()
+                    except Exception as e:
+                        output = f"❌ Ошибка: {str(e)}"
+                    
+                    # Восстанавливаем input()
+                    __builtins__.input = original_input
+                    
+                    output
+                `);
+
+                // Показываем результат
+                if (result && result.trim()) {
+                    output.textContent = result;
+                } else if (!output.textContent) {
+                    output.textContent = '→ (выполнено без вывода)';
+                }
+
+                pyStatus.textContent = '✅ готов';
+                pyStatus.className = 'status ready';
+
+            } catch (e) {
+                output.textContent = '❌ ' + e.message;
+                pyStatus.textContent = '❌ ошибка';
+                pyStatus.className = 'status error';
+            }
+        }
+
+        // ==================== ОБРАБОТЧИКИ ====================
+        projectList.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (btn) {
+                const action = btn.dataset.action;
+                const id = btn.dataset.id;
+                if (action === 'delete') deleteProject(id);
+                return;
+            }
+            const nameSpan = e.target.closest('.project-name');
+            if (nameSpan) {
+                if (state.currentFile) {
+                    state.currentFile.content = codeInput.value;
+                    saveData();
+                }
+                const id = nameSpan.dataset.id;
+                if (id) openProject(id);
+            }
+        });
+
+        projectList.addEventListener('dblclick', (e) => {
+            const nameSpan = e.target.closest('.project-name');
+            if (nameSpan) {
+                const id = nameSpan.dataset.id;
+                if (id) renameProject(id);
+            }
+        });
+
+        // ==================== РЕДАКТОР ====================
+        // Синхронизация прокрутки
+        codeInput.addEventListener('scroll', function() {
+            lineNumbers.scrollTop = this.scrollTop;
+            codeMirror.scrollTop = this.scrollTop;
+            codeMirror.scrollLeft = this.scrollLeft;
+        });
+
+        // Обновление при вводе
+        codeInput.addEventListener('input', function() {
+            updateLineNumbers();
+            updateHighlight();
+            if (state.currentFile) {
+                state.currentFile.content = this.value;
+                saveData();
+            }
+        });
+
+        // ==================== АВТО-ТАБУЛЯЦИЯ ====================
+        codeInput.addEventListener('keydown', function(e) {
+            // Ctrl+Enter - запуск
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runCode();
+                return;
+            }
+
+            // Ctrl+S - сохранение
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveCurrentFile();
+                return;
+            }
+
+            // TAB - вставка 4 пробелов
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                
+                if (start !== end) {
+                    // Если выделен текст - добавляем отступ перед каждой строкой
+                    const lines = this.value.split('\n');
+                    const selStartLine = this.value.substring(0, start).split('\n').length - 1;
+                    const selEndLine = this.value.substring(0, end).split('\n').length - 1;
+                    
+                    for (let i = selStartLine; i <= selEndLine; i++) {
+                        lines[i] = '    ' + lines[i];
+                    }
+                    this.value = lines.join('\n');
+                    this.selectionStart = start + 4;
+                    this.selectionEnd = end + 4 * (selEndLine - selStartLine + 1);
+                } else {
+                    // Просто вставляем 4 пробела
+                    this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+                    this.selectionStart = start + 4;
+                    this.selectionEnd = start + 4;
+                }
+                
+                updateLineNumbers();
+                updateHighlight();
+                if (state.currentFile) {
+                    state.currentFile.content = this.value;
+                    saveData();
+                }
+                return;
+            }
+
+            // Shift+Tab - удаление отступа
+            if (e.key === 'Tab' && e.shiftKey) {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const lines = this.value.split('\n');
+                const selStartLine = this.value.substring(0, start).split('\n').length - 1;
+                const selEndLine = this.value.substring(0, end).split('\n').length - 1;
+                
+                for (let i = selStartLine; i <= selEndLine; i++) {
+                    if (lines[i].startsWith('    ')) {
+                        lines[i] = lines[i].substring(4);
+                    }
+                }
+                this.value = lines.join('\n');
+                this.selectionStart = Math.max(0, start - 4);
+                this.selectionEnd = Math.max(0, end - 4 * (selEndLine - selStartLine + 1));
+                
+                updateLineNumbers();
+                updateHighlight();
+                if (state.currentFile) {
+                    state.currentFile.content = this.value;
+                    saveData();
+                }
+                return;
+            }
+
+            // Enter - автоматический отступ
+            if (e.key === 'Enter') {
+                const start = this.selectionStart;
+                const val = this.value;
+                // Находим текущую строку
+                const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+                const currentLine = val.substring(lineStart, start);
+                // Определяем отступ
+                const indentMatch = currentLine.match(/^(\s*)/);
+                const indent = indentMatch ? indentMatch[1] : '';
+                // Проверяем, заканчивается ли строка на :
+                const endsWithColon = currentLine.trim().endsWith(':');
+                const extraIndent = endsWithColon ? '    ' : '';
+                
+                e.preventDefault();
+                this.value = val.substring(0, start) + '\n' + indent + extraIndent + val.substring(start);
+                this.selectionStart = start + indent.length + extraIndent.length + 1;
+                this.selectionEnd = this.selectionStart;
+                
+                updateLineNumbers();
+                updateHighlight();
+                if (state.currentFile) {
+                    state.currentFile.content = this.value;
+                    saveData();
+                }
+                return;
+            }
+        });
+
+        // ==================== АВТО-ЗАКРЫТИЕ СКОБОК ====================
+        const pairs = {
+            '(': ')', '[': ']', '{': '}',
+            '"': '"', "'": "'", '`': '`'
+        };
+        const quoteChars = ['"', "'", '`'];
+        function isQuote(ch) { return quoteChars.includes(ch); }
+        function isPair(ch) { return ch in pairs; }
+        function isClose(ch) { return Object.values(pairs).includes(ch); }
+
+        codeInput.addEventListener('keydown', function(e) {
+            const ch = e.key;
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const val = this.value;
+
+            if (start !== end && isPair(ch) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const sel = val.substring(start, end);
+                const close = pairs[ch];
+                if (isQuote(ch) && sel.includes(ch)) return;
+                e.preventDefault();
+                this.value = val.substring(0, start) + ch + sel + close + val.substring(end);
+                this.selectionStart = start + 1;
+                this.selectionEnd = end + 1;
+                updateLineNumbers();
+                updateHighlight();
+                if (state.currentFile) {
+                    state.currentFile.content = this.value;
+                    saveData();
+                }
+                return;
+            }
+
+            if (isClose(ch) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                if (val[start] === ch) {
+                    e.preventDefault();
+                    this.selectionStart = start + 1;
+                    this.selectionEnd = start + 1;
+                    updateLineNumbers();
+                    updateHighlight();
+                    return;
+                }
+            }
+
+            if (isPair(ch) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                if (isQuote(ch)) {
+                    const prev = start > 0 ? val[start - 1] : '';
+                    if (prev === ch && (start < 2 || val[start - 2] !== '\\')) {
+                        if (val[start] === ch) {
+                            e.preventDefault();
+                            this.selectionStart = start + 1;
+                            this.selectionEnd = start + 1;
+                            updateLineNumbers();
+                            updateHighlight();
+                            return;
+                        }
+                    }
+                    if (val[start] === ch) return;
+                }
+                e.preventDefault();
+                const close = pairs[ch];
+                this.value = val.substring(0, start) + ch + close + val.substring(end);
+                this.selectionStart = start + 1;
+                this.selectionEnd = start + 1;
+                updateLineNumbers();
+                updateHighlight();
+                if (state.currentFile) {
+                    state.currentFile.content = this.value;
+                    saveData();
+                }
+                return;
+            }
+
+            if (e.key === 'Backspace' && !e.ctrlKey && !e.metaKey) {
+                if (start === end && start > 0) {
+                    const prev = val[start - 1];
+                    const next = val[start];
+                    if (isPair(prev) && pairs[prev] === next) {
+                        e.preventDefault();
+                        this.value = val.substring(0, start - 1) + val.substring(start + 1);
+                        this.selectionStart = start - 1;
+                        this.selectionEnd = start - 1;
+                        updateLineNumbers();
+                        updateHighlight();
+                        if (state.currentFile) {
+                            state.currentFile.content = this.value;
+                            saveData();
+                        }
+                        return;
+                    }
+                }
+            }
+        });
+
+        // ==================== КНОПКИ ====================
+        newFileBtn.addEventListener('click', addNewFile);
+        saveBtn.addEventListener('click', saveCurrentFile);
+        runBtn.addEventListener('click', runCode);
+
+        // ==================== ТЕМА ====================
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setTheme(theme) {
+            if (theme === 'light') body.classList.add('light');
+            else body.classList.remove('light');
+            localStorage.setItem('theme', theme);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setTheme(body.classList.contains('light') ? 'dark' : 'light');
+        });
+
+        try {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') setTheme('light');
+        } catch (e) {}
+
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        function init() {
+            const data = loadData();
+            state.projects = data.projects || [];
+            state.fileCounter = data.fileCounter || 1;
+
+            if (state.projects.length === 0) {
+                const defaultProject = {
+                    id: 'p' + Date.now() + Math.random().toString(36).substr(2, 4),
+                    name: 'Мой первый проект',
+                    files: [{
+                        name: 'main.py',
+                        content: '# Настоящий Python через Pyodide!\nprint("Hello, World!")\n\nx = 5\nif x > 3:\n    print("x больше 3")\nelse:\n    print("x меньше или равно 3")\n\n# Попробуй input()\nname = input("Как тебя зовут? ")\nprint("Привет, " + name)'
+                    }]
+                };
+                state.projects.push(defaultProject);
+                saveData();
+            }
+
+            openProject(state.projects[0].id);
+            
+            // Загружаем Pyodide
+            loadPyodide();
+        }
+
+        init();
+        console.log('✅ Приложение запущено. Загружаем Pyodide...');
+    })();
+</script>
 </body>
 </html>
