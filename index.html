@@ -751,6 +751,13 @@
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script>
     (function() {
+        // ============================================================
+        // 1. ВСТАВЬ СВОЙ БЕСПЛАТНЫЙ КЛЮЧ OpenRouter СЮДА:
+        //    Получить можно на https://openrouter.ai/keys
+        //    Если оставить пустым, программа запросит ключ при первом запуске
+        // ============================================================
+        const MY_OPENROUTER_KEY = 'mistralai/mistral-7b-instruct:free';  // например: 'sk-or-v1-...'
+
         // ==================== ПРИМЕР КОДА ====================
         const GOOD_CODE = 'name = input("Как тебя зовут? ")\nprint("Привет, " + name + "!")\n\nage = input("Сколько тебе лет? ")\nprint("Тебе", age, "лет")';
 
@@ -1180,12 +1187,16 @@
                 return;
             }
 
-            // Проверяем наличие ключа
-            let apiKey = localStorage.getItem('openrouter_key');
+            // ---- Получение ключа ----
+            let apiKey = MY_OPENROUTER_KEY; // используем встроенный ключ, если задан
             if (!apiKey) {
-                apiKey = prompt('Введите ваш бесплатный API-ключ OpenRouter:\n(Получить на https://openrouter.ai/keys)');
-                if (!apiKey) return;
-                localStorage.setItem('openrouter_key', apiKey);
+                // Если не задан, пробуем взять из localStorage
+                apiKey = localStorage.getItem('openrouter_key');
+                if (!apiKey) {
+                    apiKey = prompt('Введите ваш бесплатный API-ключ OpenRouter:\n(Получить на https://openrouter.ai/keys)');
+                    if (!apiKey) return;
+                    localStorage.setItem('openrouter_key', apiKey);
+                }
             }
 
             const originalLabel = aiBtn.innerHTML;
@@ -1202,7 +1213,7 @@
                         'X-Title': 'Python IDE'
                     },
                     body: JSON.stringify({
-                        model: 'google/gemini-2.0-flash-exp:free', // или 'mistralai/mistral-7b-instruct:free'
+                        model: 'google/gemini-2.0-flash-exp:free', // бесплатная чат-модель
                         messages: [
                             {
                                 role: 'user',
@@ -1222,8 +1233,7 @@
                 const data = await response.json();
                 const reply = data.choices?.[0]?.message?.content || 'Нет ответа от ИИ.';
 
-                // Выводим ответ в панель вывода
-                output.innerHTML = ''; // очищаем вывод
+                output.innerHTML = '';
                 appendOutput('🤖 ИИ отвечает:\n' + reply);
 
             } catch (e) {
