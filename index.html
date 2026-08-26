@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python IDE + AI Chat</title>
+    <title>Python IDE + AI</title>
     <style>
-        /* ========== ОСНОВНЫЕ СТИЛИ (без изменений) ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Roboto Mono', monospace; }
+
         body {
             min-height: 100vh;
             background: #0d1117;
@@ -20,6 +20,7 @@
         }
         body.light { background: #e8edf4; }
 
+        /* ---------- светлячки ---------- */
         .fireflies-container {
             position: fixed;
             top: 0;
@@ -49,6 +50,7 @@
             100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.8); }
         }
 
+        /* ---------- основная панель ---------- */
         .tech-panel {
             position: relative;
             z-index: 1;
@@ -158,7 +160,6 @@
             border-color: #b5c4d9;
         }
         body.light .theme-toggle span { color: #1f2b39; }
-
         .toggle-track {
             width: 38px;
             height: 20px;
@@ -188,6 +189,7 @@
             background: #f5c542;
         }
 
+        /* ---------- сетка ---------- */
         .main-grid {
             display: grid;
             grid-template-columns: 220px 1fr 340px;
@@ -197,6 +199,7 @@
             overflow: hidden;
         }
 
+        /* ---------- сайдбар ---------- */
         .sidebar {
             background: #0d1117;
             border-radius: 16px;
@@ -274,6 +277,7 @@
         body.light .icon-btn:hover { color: #1f2b39; background: #d5dce6; }
         .icon-btn.danger:hover { color: #e34f4f; }
 
+        /* ---------- редактор ---------- */
         .editor-area {
             display: flex;
             flex-direction: column;
@@ -306,17 +310,19 @@
         body.light .editor-wrapper {
             background: #e8edf4;
         }
+
+        /* ---------- номера строк ---------- */
         .line-numbers {
             padding: 10px 8px 10px 12px;
             color: #484f58;
-            font-size: 0.7rem;
-            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;   /* ← теперь одинаковый с редактором */
+            font-family: 'Fira Code', 'Roboto Mono', monospace;
             text-align: right;
             user-select: none;
             background: rgba(255, 255, 255, 0.03);
             border-right: 1px solid #21262d;
             min-width: 32px;
-            line-height: 1.6;
+            line-height: 1.6;      /* ← одинаковый с редактором */
             overflow: hidden;
             white-space: pre;
             display: block;
@@ -329,12 +335,15 @@
             background: rgba(0, 0, 0, 0.03);
             border-right-color: #d5dce6;
         }
+
         .editor-content {
             flex: 1;
             position: relative;
             overflow: hidden;
             min-height: 0;
         }
+
+        /* ---------- подсветка синтаксиса ---------- */
         .syntax-highlight {
             position: absolute;
             top: 0;
@@ -345,8 +354,7 @@
             font-family: 'Fira Code', 'Roboto Mono', monospace;
             font-size: 0.85rem;
             line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            white-space: pre;          /* ← без переноса, горизонтальный скролл */
             overflow: auto;
             pointer-events: none;
             color: #c9d1d9;
@@ -354,9 +362,13 @@
             z-index: 1;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            box-sizing: border-box;
         }
-        .syntax-highlight::-webkit-scrollbar { display: none; }
+        .syntax-highlight::-webkit-scrollbar {
+            display: none;
+        }
         body.light .syntax-highlight { color: #1f2b39; }
+
         .syntax-highlight .keyword { color: #ff7b72; }
         .syntax-highlight .string { color: #a5d6ff; }
         .syntax-highlight .comment { color: #8b949e; font-style: italic; }
@@ -366,6 +378,7 @@
         .syntax-highlight .operator { color: #ff7b72; }
         .syntax-highlight .class-name { color: #ff7b72; }
         .syntax-highlight .decorator { color: #ffa657; }
+
         body.light .syntax-highlight .keyword { color: #cf222e; }
         body.light .syntax-highlight .string { color: #0a3069; }
         body.light .syntax-highlight .comment { color: #6e7781; }
@@ -374,6 +387,8 @@
         body.light .syntax-highlight .builtin { color: #953800; }
         body.light .syntax-highlight .operator { color: #cf222e; }
         body.light .syntax-highlight .decorator { color: #953800; }
+
+        /* ---------- textarea (прозрачная, поверх подсветки) ---------- */
         textarea {
             width: 100%;
             height: 100%;
@@ -387,16 +402,20 @@
             padding: 10px 14px;
             font-family: 'Fira Code', 'Roboto Mono', monospace;
             tab-size: 4;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            white-space: pre;          /* ← без переноса, горизонтальный скролл */
             position: relative;
             z-index: 2;
             caret-color: #c9d1d9;
             overflow: auto;
             box-sizing: border-box;
+            scrollbar-width: thin;
         }
-        body.light textarea { caret-color: #1f2b39; }
+        body.light textarea {
+            caret-color: #1f2b39;
+        }
+        /* Скрываем полосу прокрутки у подсветки, но у textarea оставляем */
 
+        /* ---------- панель вывода ---------- */
         .output-panel {
             background: #0d1117;
             border-radius: 16px;
@@ -439,6 +458,7 @@
             background: #21262d;
         }
         body.light .output-header .clear-btn:hover { background: #d5dce6; }
+
         .output-area {
             flex: 1;
             overflow-y: auto;
@@ -492,6 +512,7 @@
             display: block;
         }
 
+        /* ---------- кнопки ---------- */
         .action-bar {
             display: flex;
             flex-wrap: wrap;
@@ -553,6 +574,7 @@
         body.light .btn-ai:hover { background: #8a63d2; }
         .btn:active { transform: scale(0.97); }
 
+        /* ---------- уведомления ---------- */
         .notification-toast {
             position: fixed;
             bottom: 30px;
@@ -577,6 +599,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ---------- адаптив ---------- */
         @media (max-width: 1200px) {
             .main-grid { grid-template-columns: 200px 1fr 280px; gap: 12px; }
         }
@@ -602,13 +625,13 @@
             .btn { padding: 5px 14px; font-size: 0.7rem; }
             textarea { font-size: 0.75rem; padding: 6px 10px; }
             .syntax-highlight { font-size: 0.75rem; padding: 6px 10px; }
-            .line-numbers { font-size: 0.6rem; padding: 6px 4px 6px 8px; min-width: 24px; }
+            .line-numbers { font-size: 0.75rem; padding: 6px 4px 6px 8px; min-width: 24px; }
             .file-item { font-size: 0.7rem; padding: 5px 8px; }
             .led { width: 8px; height: 8px; }
             .sys-label { font-size: 0.5rem; padding: 2px 8px; }
         }
 
-        /* ========== СТИЛИ ДЛЯ ЧАТА ========== */
+        /* ---------- стили чата ---------- */
         .chat-overlay {
             position: fixed;
             top: 0;
@@ -622,9 +645,7 @@
             align-items: center;
             backdrop-filter: blur(4px);
         }
-        .chat-overlay.active {
-            display: flex;
-        }
+        .chat-overlay.active { display: flex; }
         .chat-window {
             background: #161b22;
             border: 2px solid #30363d;
@@ -773,6 +794,24 @@
             font-size: 0.8rem;
             padding: 8px 0;
         }
+
+        /* ---------- убираем полосу у подсветки, но оставляем у textarea ---------- */
+        .syntax-highlight::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+        .syntax-highlight {
+            scrollbar-width: none;
+        }
+        /* У textarea полоса остаётся, но тонкая */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        textarea::-webkit-scrollbar-track { background: transparent; }
+        textarea::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        body.light textarea::-webkit-scrollbar-thumb { background: #c5d0df; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #484f58; }
     </style>
 </head>
 <body>
@@ -836,15 +875,14 @@
     </div>
 </div>
 
-<!-- ====== МОДАЛЬНОЕ ОКНО ЧАТА ====== -->
+<!-- Модальное окно чата -->
 <div class="chat-overlay" id="chatOverlay">
     <div class="chat-window">
         <div class="chat-header">
-            <span>🧠 Чат с AI &nbsp;<small style="font-weight:400;font-size:0.75rem;color:#8b9bb5;">(работает с текущим файлом)</small></span>
+            <span>🧠 Чат с AI <small style="font-weight:400;font-size:0.75rem;color:#8b9bb5;">(работает с текущим файлом)</small></span>
             <button class="chat-close" id="chatCloseBtn">&times;</button>
         </div>
         <div class="chat-messages" id="chatMessages">
-            <!-- Сообщения будут добавляться сюда -->
             <div class="chat-msg ai">
                 <span class="msg-label">🤖 AI</span>
                 Привет! Я помогу тебе с кодом. Напиши свой вопрос, а я учту содержимое текущего файла.
@@ -861,9 +899,9 @@
 <script>
     (function() {
         // ============================================================
-        // ВСТАВЬ СВОЙ БЕСПЛАТНЫЙ КЛЮЧ OpenRouter СЮДА:
+        //  ВСТАВЬ СВОЙ БЕСПЛАТНЫЙ КЛЮЧ OpenRouter СЮДА:
         // ============================================================
-        const MY_OPENROUTER_KEY = '';  // например: 'sk-or-v1-...'
+        const MY_OPENROUTER_KEY = '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';  // например: 'sk-or-v1-...'
 
         // ==================== ПРИМЕР КОДА ====================
         const GOOD_CODE = 'name = input("Как тебя зовут? ")\nprint("Привет, " + name + "!")\n\nage = input("Сколько тебе лет? ")\nprint("Тебе", age, "лет")';
@@ -1270,17 +1308,14 @@
         }
 
         // ==================== ЧАТ С ИИ ====================
-        // ---- Элементы чата ----
         const chatOverlay = document.getElementById('chatOverlay');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const chatSendBtn = document.getElementById('chatSendBtn');
         const chatCloseBtn = document.getElementById('chatCloseBtn');
 
-        // ---- Хранилище истории чата (только в памяти) ----
         let chatHistory = [];
 
-        // ---- Получение ключа ----
         function getApiKey() {
             let key = MY_OPENROUTER_KEY;
             if (!key) {
@@ -1294,7 +1329,6 @@
             return key;
         }
 
-        // ---- Добавление сообщения в чат (UI) ----
         function addMessage(role, text) {
             const div = document.createElement('div');
             div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'ai');
@@ -1302,7 +1336,6 @@
             label.className = 'msg-label';
             label.textContent = role === 'user' ? '👤 Вы' : '🤖 AI';
             div.appendChild(label);
-            // Для текста используем pre-wrap, чтобы сохранить форматирование
             const textNode = document.createElement('div');
             textNode.style.whiteSpace = 'pre-wrap';
             textNode.textContent = text;
@@ -1311,20 +1344,16 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // ---- Очистка чата (при желании можно добавить кнопку) ----
-        // ---- Отправка сообщения ----
         async function sendMessage() {
             const userMsg = chatInput.value.trim();
             if (!userMsg) return;
 
-            // Добавляем сообщение пользователя
             addMessage('user', userMsg);
             chatInput.value = '';
             chatInput.style.height = 'auto';
             chatSendBtn.disabled = true;
             chatSendBtn.textContent = '⏳';
 
-            // Показываем индикатор загрузки
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'chat-loading';
             loadingDiv.textContent = '⏳ AI печатает...';
@@ -1339,11 +1368,9 @@
                     return;
                 }
 
-                // Получаем текущий код и имя файла
                 const currentCode = codeInput.value || '';
                 const fileName = state.currentFile ? state.currentFile.name : 'main.py';
 
-                // Строим системный промпт с кодом
                 const systemPrompt = `Ты — ИИ-помощник, который помогает с Python-кодом. 
     Сейчас открыт файл "${fileName}". Вот его содержимое:
     \`\`\`python
@@ -1352,13 +1379,11 @@
     Отвечай на вопросы пользователя, учитывая этот код. Если код пуст, скажи об этом.
     Твои ответы должны быть полезными, чёткими и на русском языке.`;
 
-                // Собираем историю (последние 10 сообщений для контекста)
                 const historyMessages = chatHistory.slice(-10).map(msg => ({
                     role: msg.role === 'user' ? 'user' : 'assistant',
                     content: msg.text
                 }));
 
-                // Отправляем запрос
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -1388,11 +1413,7 @@
 
                 const data = await response.json();
                 const aiReply = data.choices?.[0]?.message?.content || 'Нет ответа от ИИ.';
-
-                // Добавляем сообщение AI
                 addMessage('ai', aiReply);
-
-                // Сохраняем историю (только в памяти)
                 chatHistory.push({ role: 'user', text: userMsg });
                 chatHistory.push({ role: 'assistant', text: aiReply });
 
@@ -1411,7 +1432,6 @@
             }
         }
 
-        // ---- Открытие / закрытие чата ----
         function openChat() {
             chatOverlay.classList.add('active');
             chatInput.focus();
@@ -1421,7 +1441,6 @@
             chatOverlay.classList.remove('active');
         }
 
-        // ---- Обработчики чата ----
         aiBtn.addEventListener('click', openChat);
         chatCloseBtn.addEventListener('click', closeChat);
         chatOverlay.addEventListener('click', (e) => {
@@ -1434,29 +1453,25 @@
                 sendMessage();
             }
         });
-        // Автоматическая высота textarea
         chatInput.addEventListener('input', () => {
             chatInput.style.height = 'auto';
             chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
         });
 
-        // ---- Очистка чата при загрузке страницы (история не сохраняется) ----
-        // Просто оставляем приветственное сообщение
+        // Очищаем историю при загрузке
         chatHistory = [];
-        // Удаляем всё, кроме первого приветственного сообщения
         const firstMsg = chatMessages.querySelector('.chat-msg.ai');
         chatMessages.innerHTML = '';
         if (firstMsg) {
             chatMessages.appendChild(firstMsg);
         } else {
-            // Если по какой-то причине нет, создаём заново
             const div = document.createElement('div');
             div.className = 'chat-msg ai';
             div.innerHTML = '<span class="msg-label">🤖 AI</span><div style="white-space:pre-wrap;">Привет! Я помогу тебе с кодом. Напиши свой вопрос, а я учту содержимое текущего файла.</div>';
             chatMessages.appendChild(div);
         }
 
-        // ==================== ОБРАБОТЧИКИ СОБЫТИЙ (файлы, редактор) ====================
+        // ==================== ОБРАБОТЧИКИ ====================
         fileList.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-action]');
             if (btn) {
@@ -1470,8 +1485,6 @@
                     saveData();
                 }
                 openFile(nameSpan.dataset.id);
-                // При смене файла обновляем контекст для чата (в следующем запросе)
-                // Можно добавить системное сообщение в чат? Но это необязательно.
             }
         });
 
@@ -1503,6 +1516,7 @@
             }
         });
 
+        // Синхронизация прокрутки (вертикальной и горизонтальной)
         codeInput.addEventListener('scroll', function() {
             syntaxHighlight.scrollTop = this.scrollTop;
             syntaxHighlight.scrollLeft = this.scrollLeft;
