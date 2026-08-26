@@ -20,7 +20,6 @@
         }
         body.light { background: #e8edf4; }
 
-        /* ---------- светлячки ---------- */
         .fireflies-container {
             position: fixed;
             top: 0;
@@ -50,7 +49,6 @@
             100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.8); }
         }
 
-        /* ---------- основная панель ---------- */
         .tech-panel {
             position: relative;
             z-index: 1;
@@ -189,7 +187,6 @@
             background: #f5c542;
         }
 
-        /* ---------- сетка ---------- */
         .main-grid {
             display: grid;
             grid-template-columns: 220px 1fr 340px;
@@ -199,7 +196,6 @@
             overflow: hidden;
         }
 
-        /* ---------- сайдбар ---------- */
         .sidebar {
             background: #0d1117;
             border-radius: 16px;
@@ -277,7 +273,6 @@
         body.light .icon-btn:hover { color: #1f2b39; background: #d5dce6; }
         .icon-btn.danger:hover { color: #e34f4f; }
 
-        /* ---------- редактор ---------- */
         .editor-area {
             display: flex;
             flex-direction: column;
@@ -311,18 +306,17 @@
             background: #e8edf4;
         }
 
-        /* ---------- номера строк ---------- */
         .line-numbers {
             padding: 10px 8px 10px 12px;
             color: #484f58;
-            font-size: 0.85rem;   /* ← теперь одинаковый с редактором */
+            font-size: 0.85rem;
             font-family: 'Fira Code', 'Roboto Mono', monospace;
             text-align: right;
             user-select: none;
             background: rgba(255, 255, 255, 0.03);
             border-right: 1px solid #21262d;
             min-width: 32px;
-            line-height: 1.6;      /* ← одинаковый с редактором */
+            line-height: 1.6;
             overflow: hidden;
             white-space: pre;
             display: block;
@@ -343,7 +337,6 @@
             min-height: 0;
         }
 
-        /* ---------- подсветка синтаксиса ---------- */
         .syntax-highlight {
             position: absolute;
             top: 0;
@@ -354,7 +347,7 @@
             font-family: 'Fira Code', 'Roboto Mono', monospace;
             font-size: 0.85rem;
             line-height: 1.6;
-            white-space: pre;          /* ← без переноса, горизонтальный скролл */
+            white-space: pre;
             overflow: auto;
             pointer-events: none;
             color: #c9d1d9;
@@ -388,7 +381,6 @@
         body.light .syntax-highlight .operator { color: #cf222e; }
         body.light .syntax-highlight .decorator { color: #953800; }
 
-        /* ---------- textarea (прозрачная, поверх подсветки) ---------- */
         textarea {
             width: 100%;
             height: 100%;
@@ -402,7 +394,7 @@
             padding: 10px 14px;
             font-family: 'Fira Code', 'Roboto Mono', monospace;
             tab-size: 4;
-            white-space: pre;          /* ← без переноса, горизонтальный скролл */
+            white-space: pre;
             position: relative;
             z-index: 2;
             caret-color: #c9d1d9;
@@ -413,9 +405,15 @@
         body.light textarea {
             caret-color: #1f2b39;
         }
-        /* Скрываем полосу прокрутки у подсветки, но у textarea оставляем */
+        textarea::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        textarea::-webkit-scrollbar-track { background: transparent; }
+        textarea::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        body.light textarea::-webkit-scrollbar-thumb { background: #c5d0df; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #484f58; }
 
-        /* ---------- панель вывода ---------- */
         .output-panel {
             background: #0d1117;
             border-radius: 16px;
@@ -512,7 +510,6 @@
             display: block;
         }
 
-        /* ---------- кнопки ---------- */
         .action-bar {
             display: flex;
             flex-wrap: wrap;
@@ -574,7 +571,6 @@
         body.light .btn-ai:hover { background: #8a63d2; }
         .btn:active { transform: scale(0.97); }
 
-        /* ---------- уведомления ---------- */
         .notification-toast {
             position: fixed;
             bottom: 30px;
@@ -599,7 +595,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ---------- адаптив ---------- */
         @media (max-width: 1200px) {
             .main-grid { grid-template-columns: 200px 1fr 280px; gap: 12px; }
         }
@@ -631,7 +626,6 @@
             .sys-label { font-size: 0.5rem; padding: 2px 8px; }
         }
 
-        /* ---------- стили чата ---------- */
         .chat-overlay {
             position: fixed;
             top: 0;
@@ -794,24 +788,6 @@
             font-size: 0.8rem;
             padding: 8px 0;
         }
-
-        /* ---------- убираем полосу у подсветки, но оставляем у textarea ---------- */
-        .syntax-highlight::-webkit-scrollbar {
-            width: 0;
-            height: 0;
-        }
-        .syntax-highlight {
-            scrollbar-width: none;
-        }
-        /* У textarea полоса остаётся, но тонкая */
-        textarea::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        textarea::-webkit-scrollbar-track { background: transparent; }
-        textarea::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-        body.light textarea::-webkit-scrollbar-thumb { background: #c5d0df; }
-        textarea::-webkit-scrollbar-thumb:hover { background: #484f58; }
     </style>
 </head>
 <body>
@@ -875,7 +851,6 @@
     </div>
 </div>
 
-<!-- Модальное окно чата -->
 <div class="chat-overlay" id="chatOverlay">
     <div class="chat-window">
         <div class="chat-header">
@@ -900,6 +875,7 @@
     (function() {
         // ============================================================
         //  ВСТАВЬ СВОЙ БЕСПЛАТНЫЙ КЛЮЧ OpenRouter СЮДА:
+        //  Получить можно на https://openrouter.ai/keys
         // ============================================================
         const MY_OPENROUTER_KEY = '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';  // например: 'sk-or-v1-...'
 
@@ -1307,7 +1283,7 @@
             }
         }
 
-        // ==================== ЧАТ С ИИ ====================
+        // ==================== ЧАТ С ИИ (ОБНОВЛЁННЫЙ) ====================
         const chatOverlay = document.getElementById('chatOverlay');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
@@ -1384,6 +1360,7 @@
                     content: msg.text
                 }));
 
+                // ====== ИСПОЛЬЗУЕМ МОДЕЛЬ liquid/lfm-2.5-2.6b:free ======
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -1393,7 +1370,7 @@
                         'X-Title': 'Python IDE'
                     },
                     body: JSON.stringify({
-                        model: 'google/gemini-2.0-flash-exp:free',
+                        model: 'liquid/lfm-2.5-2.6b:free',
                         messages: [
                             { role: 'system', content: systemPrompt },
                             ...historyMessages,
@@ -1407,8 +1384,14 @@
                 loadingDiv.remove();
 
                 if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`Ошибка API: ${response.status} ${errText}`);
+                    let errText = '';
+                    try {
+                        const errJson = await response.json();
+                        errText = JSON.stringify(errJson);
+                    } catch (_) {
+                        errText = await response.text();
+                    }
+                    throw new Error(`Ошибка API (${response.status}): ${errText}`);
                 }
 
                 const data = await response.json();
@@ -1423,6 +1406,9 @@
                 if (errorMsg.includes('401') || errorMsg.includes('403')) {
                     localStorage.removeItem('openrouter_key');
                     errorMsg = '❌ Ключ недействителен. Введите новый ключ при следующем запросе.';
+                }
+                if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Load failed') || errorMsg.includes('NetworkError')) {
+                    errorMsg += '\n💡 Возможно, проблема с CORS или блокировкой. Попробуйте:\n- Отключить расширения (AdBlock, VPN)\n- Использовать другой браузер\n- Проверить интернет-соединение';
                 }
                 addMessage('ai', '❌ Ошибка: ' + errorMsg);
             } finally {
@@ -1516,7 +1502,6 @@
             }
         });
 
-        // Синхронизация прокрутки (вертикальной и горизонтальной)
         codeInput.addEventListener('scroll', function() {
             syntaxHighlight.scrollTop = this.scrollTop;
             syntaxHighlight.scrollLeft = this.scrollLeft;
