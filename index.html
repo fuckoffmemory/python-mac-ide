@@ -875,7 +875,6 @@
     (function() {
         // ============================================================
         //  ВСТАВЬ СВОЙ БЕСПЛАТНЫЙ КЛЮЧ OpenRouter СЮДА:
-        //  Получить можно на https://openrouter.ai/keys
         // ============================================================
         const MY_OPENROUTER_KEY = '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';  // например: 'sk-or-v1-...'
 
@@ -1283,7 +1282,7 @@
             }
         }
 
-        // ==================== ЧАТ С ИИ (ОБНОВЛЁННЫЙ) ====================
+        // ==================== ЧАТ С ИИ (ИСПРАВЛЕННЫЙ) ====================
         const chatOverlay = document.getElementById('chatOverlay');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
@@ -1360,13 +1359,13 @@
                     content: msg.text
                 }));
 
-                // ====== ИСПОЛЬЗУЕМ МОДЕЛЬ liquid/lfm-2.5-2.6b:free ======
+                // ====== ИСПРАВЛЕНИЕ: фиксированный Referer ======
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${apiKey}`,
-                        'HTTP-Referer': window.location.href,
+                        'HTTP-Referer': 'https://openrouter.ai',  // фиксированный Referer
                         'X-Title': 'Python IDE'
                     },
                     body: JSON.stringify({
@@ -1408,7 +1407,7 @@
                     errorMsg = '❌ Ключ недействителен. Введите новый ключ при следующем запросе.';
                 }
                 if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Load failed') || errorMsg.includes('NetworkError')) {
-                    errorMsg += '\n💡 Возможно, проблема с CORS или блокировкой. Попробуйте:\n- Отключить расширения (AdBlock, VPN)\n- Использовать другой браузер\n- Проверить интернет-соединение';
+                    errorMsg += '\n\n💡 Попробуйте:\n1. Запустить страницу через локальный сервер (например, Live Server в VS Code).\n2. Отключить расширения (AdBlock, VPN, Privacy Badger).\n3. Использовать другой браузер (Chrome, Firefox).\n4. Проверить интернет-соединение.';
                 }
                 addMessage('ai', '❌ Ошибка: ' + errorMsg);
             } finally {
